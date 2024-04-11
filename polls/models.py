@@ -1,14 +1,23 @@
 import datetime
 from django.db import models
 from django.utils import timezone
+from django.contrib import admin
 # Create your models here.
 class Question (models.Model):
-
-    def was_published_recently(self):
-        return self.publish_date >= timezone.now() - datetime.timedelta(days = 1)
-
     question_text = models.CharField(max_length=200)
     publish_date = models.DateTimeField("date published")
+    @admin.display(
+            boolean = True,
+            ordering="publish_date",
+            description="Published recently?",
+    )
+    
+    def was_published_recently(self):
+        now = timezone.now()
+        return now - datetime.timedelta(days=1) <= self.publish_date <= now
+
+    list_filter = ["publish_date"]
+    search_fields = ["question_text"]
 
     def __str__(self) -> str:
         return self.question_text
